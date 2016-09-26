@@ -1,4 +1,4 @@
-data accounts[](members[], balance, count, quitters[])
+data accounts[](members[], balance, count, quitter_index, quitters[], quitters_set[])
 data transaction_count
 data transactions[](account_id, members[], consensus, value, spend_address)
 
@@ -14,6 +14,7 @@ def create_account(id):
         self.accounts[id].members[msg.sender] = 1
         self.accounts[id].balance = msg.value
         self.accounts[id].count = 1
+        self.accounts[id].quitter_index = 0
         return 1
 
     #refund
@@ -77,6 +78,7 @@ def consent_transaction(transaction_id):
     #transaction doesn't exist
     return 0
 
+
 # Process a transaction. Request can be initiated by anyone.
 
 def process_transaction(transaction_id):
@@ -86,7 +88,16 @@ def process_transaction(transaction_id):
         if  transaction_value >= self.accounts[account_id].balance:
             return 0
 
+        i = self.accounts[account_id].quitter_index - 1
+
+        # Adjust for quitters
         
+        while(i >= 0):
+            quitter = self.accounts[account_id].quitters[i]
+            if self.transactions[transaction_id].members[quitter]:
+                self.transactions[transaction_id].members[quitter] = 0
+                self.transactions[transaction_id].consensus -= 1
+
 
         if self.transactions[transaction_id].consensus > (self.accounts[account_id].count / 2):
             send_status = send(self.transactions[transaction_id].spend_address, transaction_value)
@@ -105,12 +116,16 @@ def process_transaction(transaction_id):
 # User will only receive 50% of his share.
 
 def withdraw(id):
-    if self.accounts[id].members[msg.sender] and self.accounts[id].count > 1 and not self.accounts[id].quitters[msg.sender]:
+    if self.accounts[id].members[msg.sender] and self.accounts[id].count > 1 and not self.accounts[id].quitters_set[msg.sender]:
         amount = self.get_joining_amount(id) / 2
-        self.accounts[id].quitters[msg.sender] = 1
+        self.accounts[id].quitters_set[msg.sender] = 1
+        self.accounts[id].quitters[self.accounts[id].quitter_index] = msg.sender
+        self.accounts[id].quitter_index += 1
         status = send(msg.sender, amount)
         if not status:
-            self.accounts[id].quitters[msg.sender] = 0
+            self.accounts[id].quitter_index -= 1
+            self.accounts[id].quitters[quitter_index] = 0
+            self.accounts[id].quitters_set[msg.sender] = 0
             return 0
         self.accounts[id].count -= 1
         self.accounts[id].balance -= amount
