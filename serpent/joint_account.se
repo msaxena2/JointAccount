@@ -17,7 +17,7 @@ def create_account(id):
         return 1
 
     #refund
-    send(msg.gas, msg.sender, msg.value)
+    send(msg.sender, msg.value)
     return 0
 
 # Get the joining amount from the account.
@@ -41,10 +41,10 @@ def join_account(id):
         self.accounts[id].balance += amount
         self.accounts[id].members[msg.sender] = 1
         self.accounts[id].count += 1
-        send(msg.gas, msg.sender, msg.value - amount)
+        send(msg.sender, msg.value - amount)
         return 1
 
-    send(msg.gas, msg.sender, msg.value)
+    send(msg.sender, msg.value)
     return 0
 
 # Propose a new spend transaction
@@ -87,7 +87,7 @@ def process_transaction(transaction_id):
             return 0
 
         if self.transactions[transaction_id].consensus > (self.accounts[account_id].count / 2):
-            send_status = send(msg.gas, self.transactions[transaction_id].spend_address, transaction_value)
+            send_status = send(self.transactions[transaction_id].spend_address, transaction_value)
             if not send_status:
                 self.accounts[account_id].balance -= transaction_value
                 self.transactions[transaction_id].value = 0
