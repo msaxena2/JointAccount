@@ -97,13 +97,3 @@ def process_transaction(transaction_id):
 
         # No consensus yet.
         return 0
-
-
-
-
-
-
-
-
-
-

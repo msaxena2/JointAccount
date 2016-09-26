@@ -12,5 +12,6 @@ def create_contract():
 if __name__ == '__main__':
     test_contract = create_contract()
     test_contract.create_account("blah", sender=tester.k0, value=10)
-    print test_contract.get_joining_amount("blah")
+    print test_contract.join_account("blah", sender=tester.k1, value=11)
+
 
