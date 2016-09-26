@@ -1,4 +1,4 @@
-data accounts[](members[], balance, count)
+data accounts[](members[], balance, count, quitters[])
 data transaction_count
 data transactions[](account_id, members[], consensus, value, spend_address)
 
@@ -86,6 +86,8 @@ def process_transaction(transaction_id):
         if  transaction_value >= self.accounts[account_id].balance:
             return 0
 
+        
+
         if self.transactions[transaction_id].consensus > (self.accounts[account_id].count / 2):
             send_status = send(self.transactions[transaction_id].spend_address, transaction_value)
             if not send_status:
@@ -97,3 +99,32 @@ def process_transaction(transaction_id):
 
         # No consensus yet.
         return 0
+
+
+# Withdraw from a joint Account.
+# User will only receive 50% of his share.
+
+def withdraw(id):
+    if self.accounts[id].members[msg.sender] and self.accounts[id].count > 1 and not self.accounts[id].quitters[msg.sender]:
+        amount = self.get_joining_amount(id) / 2
+        self.accounts[id].quitters[msg.sender] = 1
+        status = send(msg.sender, amount)
+        if not status:
+            self.accounts[id].quitters[msg.sender] = 0
+            return 0
+        self.accounts[id].count -= 1
+        self.accounts[id].balance -= amount
+        self.accounts[id].members[msg.sender] = 0
+
+
+
+
+
+
+
+
+
+
+
+
+
