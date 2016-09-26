@@ -91,7 +91,7 @@ def process_transaction(transaction_id):
         i = self.accounts[account_id].quitter_index - 1
 
         # Adjust for quitters
-        
+
         while(i >= 0):
             quitter = self.accounts[account_id].quitters[i]
             if self.transactions[transaction_id].members[quitter]:
@@ -130,16 +130,4 @@ def withdraw(id):
         self.accounts[id].count -= 1
         self.accounts[id].balance -= amount
         self.accounts[id].members[msg.sender] = 0
-
-
-
-
-
-
-
-
-
-
-
-
 
