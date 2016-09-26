@@ -1,0 +1,109 @@
+data accounts[](members[], balance, count)
+data transaction_count
+data transactions[](account_id, members[], consensus, value, spend_address)
+
+def init():
+    self.transaction_count = 0
+
+# Create a new account with user provided id.
+# Returns 0 if id is taken.
+# User needs to ensure that enough gas is provided for the entire transaction.
+
+def create_account(id):
+    if not self.accounts[id].members[msg.sender]:
+        self.accounts[id].members[msg.sender] = 1
+        self.accounts[id].balance = msg.value
+        self.accounts[id].count = 1
+        return 1
+
+    #refund
+    send(msg.gas, msg.sender, msg.value)
+    return 0
+
+# Get the joining amount from the account.
+# One can only join if value of message sent  >= joining amount.
+# Returns 0 if account not present.
+
+def get_joining_amount(id):
+    if self.accounts[id].count:
+        return self.accounts[id].balance / self.accounts[id].count
+        return 1
+    return 0
+
+
+# Add a new user to an account.
+# User must ensure sufficient gas is provided in the message for the entire transaction.
+
+def join_account(id):
+
+    if msg.value >= self.get_joining_amount(id) and self.accounts[id].count and not self.accounts[id].members[msg.sender]:
+        amount = self.get_joining_amount(id)
+        self.accounts[id].balance += amount
+        self.accounts[id].members[msg.sender] = 1
+        self.accounts[id].count += 1
+        send(msg.gas, msg.sender, msg.value - amount)
+        return 1
+
+    send(msg.gas, msg.sender, msg.value)
+    return 0
+
+# Propose a new spend transaction
+
+def propose_transaction(id, spend_value, spend_address):
+    if not self.accounts[id].balance:
+        return 0
+
+    self.transaction_count += 1
+    self.transactions[transaction_count].account_id = id
+    self.transactions[transaction_count].members[msg.sender]= 1
+    self.transactions[transaction_count].consensus += 1
+    self.transactions[transaction_count].value = spend_value
+    self.transactions[transaction_count].spend_address = spend_address
+
+    return self.transaction_count
+
+
+# Give consent to a transaction
+
+def consent_transaction(transaction_id):
+    if self.transactions[transaction_id].value:
+        if self.transactions[transaction_id].members[msg.sender]:
+            return 0
+
+        self.transactions[transaction_id].members[msg.sender] = 1
+        self.transactions[transaction_id].consensus += 1
+        return 1
+
+    #transaction doesn't exist
+    return 0
+
+# Process a transaction. Request can be initiated by anyone.
+
+def process_transaction(transaction_id):
+    if self.transactions[transaction_id].value:
+        account_id = self.transactions[transaction_id].account_id
+        transaction_value = self.transactions[transaction_id].value
+        if  transaction_value >= self.accounts[account_id].balance:
+            return 0
+
+        if self.transactions[transaction_id].consensus > (self.accounts[account_id].count / 2):
+            send_status = send(msg.gas, self.transactions[transaction_id].spend_address, transaction_value)
+            if not send_status:
+                self.accounts[account_id].balance -= transaction_value
+                self.transactions[transaction_id].value = 0
+                return 1
+            #send unsuccessful. Ether retained in account
+            return 0
+
+        # No consensus yet.
+        return 0
+
+
+
+
+
+
+
+
+
+
