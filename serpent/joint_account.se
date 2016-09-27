@@ -71,8 +71,12 @@ def get_transaction(id):
 def consent_transaction(transaction_id):
     if self.transactions[transaction_id].value:
         account_id = self.transactions[transaction_id].account_id
+
+        # Not a member of the account
         if not self.accounts[account_id].members[msg.sender]:
             return 0
+
+        # Already given consent
         if self.transactions[transaction_id].members[msg.sender]:
             return 0
 
@@ -85,6 +89,7 @@ def consent_transaction(transaction_id):
 
 
 # Process a transaction. Request can be initiated by anyone.
+# TODO: possible add reward
 
 def process_transaction(transaction_id):
     if self.transactions[transaction_id].value:
@@ -102,6 +107,7 @@ def process_transaction(transaction_id):
             if self.transactions[transaction_id].members[quitter]:
                 self.transactions[transaction_id].members[quitter] = 0
                 self.transactions[transaction_id].consensus -= 1
+            i -= 1
 
 
         if self.transactions[transaction_id].consensus > (self.accounts[account_id].count / 2):
@@ -129,10 +135,11 @@ def withdraw(id):
         status = send(msg.sender, amount)
         if not status:
             self.accounts[id].quitter_index -= 1
-            self.accounts[id].quitters[quitter_index] = 0
+            self.accounts[id].quitters[self.accounts[id].quitter_index] = 0
             self.accounts[id].quitters_set[msg.sender] = 0
             return 0
         self.accounts[id].count -= 1
         self.accounts[id].balance -= amount
         self.accounts[id].members[msg.sender] = 0
+        return 1
 
