@@ -1,5 +1,5 @@
 import unittest
-from ethereum import tester, abi, utils
+from ethereum import tester, utils
 
 
 class Tests(unittest.TestCase):
@@ -40,6 +40,34 @@ class Tests(unittest.TestCase):
         transaction_value = 10
         transaction_id = self.test_contract.propose_transaction(self.account_id, transaction_value, k2_address)
         self.test_contract.consent_transaction(transaction_id, sender=tester.k1)
+        self.test_contract.process_transaction(transaction_id)
+        self.assertEqual(initial_balance + transaction_value, self.state.block.get_balance(k2_address))
+
+    def test_process_withdraw(self):
+        self.test_contract.create_account(self.account_id, sender=tester.k0, value=10)
+        self.test_contract.join_account(self.account_id, sender=tester.k1, value=10)
+        self.test_contract.join_account(self.account_id, sender=tester.k3, value=10)
+        k2_address = utils.privtoaddr(tester.k2)
+        initial_balance = self.state.block.get_balance(k2_address)
+        transaction_value = 5
+        transaction_id = self.test_contract.propose_transaction(self.account_id, transaction_value, k2_address, sender=tester.k0)
+        self.test_contract.consent_transaction(transaction_id, sender=tester.k1)
+        self.test_contract.withdraw(self.account_id, sender=tester.k1)
+        self.test_contract.process_transaction(transaction_id)
+        self.assertEqual(initial_balance, self.state.block.get_balance(k2_address))
+
+
+    def test_process_withdraw_consent(self):
+        self.test_contract.create_account(self.account_id, sender=tester.k0, value=10)
+        self.test_contract.join_account(self.account_id, sender=tester.k1, value=10)
+        self.test_contract.join_account(self.account_id, sender=tester.k3, value=10)
+        k2_address = utils.privtoaddr(tester.k2)
+        initial_balance = self.state.block.get_balance(k2_address)
+        transaction_value = 5
+        transaction_id = self.test_contract.propose_transaction(self.account_id, transaction_value, k2_address, sender=tester.k0)
+        self.test_contract.consent_transaction(transaction_id, sender=tester.k1)
+        self.test_contract.consent_transaction(transaction_id, sender=tester.k3)
+        self.test_contract.withdraw(self.account_id, sender=tester.k1)
         self.test_contract.process_transaction(transaction_id)
         self.assertEqual(initial_balance + transaction_value, self.state.block.get_balance(k2_address))
 
