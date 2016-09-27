@@ -55,19 +55,24 @@ def propose_transaction(id, spend_value, spend_address):
         return 0
 
     self.transaction_count += 1
-    self.transactions[transaction_count].account_id = id
-    self.transactions[transaction_count].members[msg.sender]= 1
-    self.transactions[transaction_count].consensus += 1
-    self.transactions[transaction_count].value = spend_value
-    self.transactions[transaction_count].spend_address = spend_address
+    self.transactions[self.transaction_count].account_id = id
+    self.transactions[self.transaction_count].members[msg.sender] = 1
+    self.transactions[self.transaction_count].consensus = 1
+    self.transactions[self.transaction_count].value = spend_value
+    self.transactions[self.transaction_count].spend_address = spend_address
 
     return self.transaction_count
 
+def get_transaction(id):
+    return self.transactions[id].consensus
 
 # Give consent to a transaction
 
 def consent_transaction(transaction_id):
     if self.transactions[transaction_id].value:
+        account_id = self.transactions[transaction_id].account_id
+        if not self.accounts[account_id].members[msg.sender]:
+            return 0
         if self.transactions[transaction_id].members[msg.sender]:
             return 0
 
