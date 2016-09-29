@@ -1,4 +1,6 @@
-## 1 The Joint Account Smart Contract 1.1 Purpose of the contract
+## 1 The Joint Account Smart Contract
+
+### 1.1 Purpose of the contract
 The smart contract aims to establish a system of accounts, which users of the contract can use to hold funds in, and collectively conduct transactions from. In order to use the account, a user can propose transactions to other users of the account, who then vote to decide whether the transaction should be upheld or not. Users are allowed to leave the account, but they are penalized for doing so.
 ### 1.2 Motivation
 The contract is meant to provide decentralized banking services. In a way, it’s a DAO.
