@@ -1,16 +1,17 @@
 data accounts[](members[], balance, count, quitter_index, quitters[], quitters_set[])
 data transaction_count
 data transactions[](account_id, members[], consensus, value, spend_address)
-
+data mining_reward
 def init():
     self.transaction_count = 0
+    self.mining_reward = 50000
 
 # Create a new account with user provided id.
 # Returns 0 if id is taken.
 # User needs to ensure that enough gas is provided for the entire transaction.
 
 def create_account(id):
-    if not self.accounts[id].members[msg.sender] and msg.value >= 50000:
+    if not self.accounts[id].members[msg.sender] and msg.value >= self.mining_reward:
         self.accounts[id].members[msg.sender] = 1
         self.accounts[id].balance = msg.value
         self.accounts[id].count = 1
@@ -94,7 +95,7 @@ def process_transaction(transaction_id):
     if self.transactions[transaction_id].value:
         account_id = self.transactions[transaction_id].account_id
         transaction_value = self.transactions[transaction_id].value
-        if  transaction_value + 50000 >= self.accounts[account_id].balance:
+        if  transaction_value + mining_reward >= self.accounts[account_id].balance:
             return 0
 
         i = self.accounts[account_id].quitter_index - 1
@@ -114,9 +115,9 @@ def process_transaction(transaction_id):
             if send_status:
                 self.accounts[account_id].balance -= transaction_value
                 self.transactions[transaction_id].value = 0
-                reward_status = send(msg.sender, 50000)
+                reward_status = send(msg.sender, mining_reward)
                 if reward_status:
-                    self.accounts[account_id].balance -= 50000
+                    self.accounts[account_id].balance -= mining_reward
                 return 1
             #send unsuccessful. Ether retained in account
             return 0
