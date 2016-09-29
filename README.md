@@ -25,5 +25,6 @@ An interesting design choice had to be made while dealing with the case of an ac
 
 
 the numbers only for the user-chosen transactions. A user can call the process transaction on any transaction, and the consensus numbers for the transaction are calculated (taking into account users who quit) at that moment. If there is consensus after adjusting the numbers, the transaction is approved. In order to incentivize users into regularly calling the process transaction method, a small reward is sent to the caller if the transaction is successful. This cost is borne by all members of the account, and can be though of as a minor transaction fee.
-1.6 Testing Contract Code
+
+### 1.6 Testing Contract Code
 The contract runner.py file has unit tests that test the contract for edge cases, such as making sure that vote of a user is not counted after he withdraws from the contract, and transactions that have consensus after user withdrawals are processed correctly. The tests can be run by simple calling ′python contract runner.py′.
